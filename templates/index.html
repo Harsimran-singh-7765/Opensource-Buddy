@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OpenSource Buddy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to OpenSource Buddy</h1>
+        <input type="text" id="topic" placeholder="Enter a topic like 'python' or 'AI'">
+        <button onclick="fetchProjects()">Find Projects</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function fetchProjects() {
+            const topic = document.getElementById('topic').value;
+            const res = await fetch('/search', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({topic})
+            });
+            const data = await res.json();
+
+            let html = `<h3>${data.summary}</h3><ul>`;
+            data.projects.forEach(p => {
+                html += `<li><a href="${p.url}" target="_blank">${p.name}</a></li>`;
+            });
+            html += `</ul><p>${data.contribution_guide}</p>`;
+            document.getElementById('results').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
+ 
