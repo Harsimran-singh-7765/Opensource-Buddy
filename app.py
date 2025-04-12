@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-#from backend.crew_controller import run_crew_flow  # Will build this soon
+from backend.agents.Project_sorter import func  # Assuming this returns your final data
 
 app = Flask(__name__)
 
@@ -9,15 +9,19 @@ def index():
 
 @app.route('/search', methods=['POST'])
 def search():
-    data = request.json
-    topic = data.get('topic')
-    
-    from backend.agents.Git_collector import run_project_hunter
+    topic = request.form.get('topic')
 
-    result = run_project_hunter(topic) 
+    if not topic:
+        return jsonify({"error": "No topic provided"}), 400
 
-    
-    return jsonify(result)
+    try:
+        result = func(topic)  
+        result = result.replace("```html", "").replace("```", "").strip()
+        return render_template("index.html", result=result)
+    except Exception as e:
+        print("❌ Error during processing:", e)
+        return jsonify({"error": "Internal server error"}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
